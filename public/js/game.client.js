@@ -1,6 +1,12 @@
 let playerId;
 let players = [];
 let eggs = [];
+let canvas;
+let ctx; 
+
+let divPlayers;
+let lblScore
+
 
 let flag = false;
 
@@ -21,11 +27,11 @@ function draw() {
 export function startGame(data) {
   playerId = data.id;
 
-  let divPlayers = document.getElementById("divPlayers");
-  let lblScore = document.getElementById("score");
+  divPlayers = document.getElementById("divPlayers");
+  lblScore = document.getElementById("score");
 
-  let canvas = document.getElementById("divGame");
-  let ctx = canvas.getContext("2d");
+  canvas = document.getElementById("myCanvas");
+  ctx = canvas.getContext("2d");
 
   setInterval(draw, 10);
 }

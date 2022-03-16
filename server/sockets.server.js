@@ -5,23 +5,38 @@ const SERVER_TIME_STEP = 100;
 
 let onlineUsers = [];
 let clients = {};
+let matchesByUser = {};
 
 const validation = (username) => {
-  return true;
+ let user = onlineUsers.find((user)=> user.username == username)
+
+ if(onlineUsers.some(user=>user.username == username)){
+   return false;
+ }else
+ {
+   return true;
+ }
+
 };
 
-io.use((client, next) => {
+
+const validarConexion = (client) => {
   let username = client.handshake.query.username;
   console.log("Middleware: validando conexion ", username, client.id);
 
   if (validation(username)) {
-    return next();
+    return true
   }
-  //client.disconnect();
-  return next(new Error("authentication error"));
-});
+  client.emit("connectionRejected",{
+    msg: `username ${username} ya esta en uso`
+  });
+  return  false;
+}
 
 io.on("connection", (client) => {
+  if(!validarConexion(client)){
+    return;
+  }
   let username = client.handshake.query.username;
   console.log("Usuario Conectado", username, client.id);
 
@@ -43,14 +58,22 @@ io.on("connection", (client) => {
     console.log(`${user.username} esta buscando partida`);
     matchmaking.addPlayer(user);
   });
+  client.on("stopSearchMatch",()=>{
+    matchmaking.removePlayer(user);
+  })
   client.on("move", (axis) => {
-    // setAxis(client.id, axis);
+    console.log("move", axis);
+      let match =  matchesByUser[client.id];
+      match.game.setAxis(client.id,axis);
   });
   client.on("disconnect", () => {
-    console.log("Usuario desconectado");
+
     // removePlayer(client.id);
-    client.broadcast.emit("userDisconnection", {
+    onlineUsers = onlineUsers.filter((user)=> user.id != client.id);
+    matchmaking.removePlayer(user);
+    client.broadcast.emit("onlineUsers", {
       message: "Se ha desconectado un usuario",
+      onlineUsers,
     });
   });
 });
@@ -69,6 +92,7 @@ const startMatchReady = (match) => {
     player.room = room;
     // io.sockets.connected[player.id].join(room);
     io.sockets.sockets.get(player.id).join(room);
+    matchesByUser[player.id] = match;
     //
   }
   io.to(room).emit("matchReady", {
@@ -78,9 +102,9 @@ const startMatchReady = (match) => {
 
   match.startGame();
 
-  setInterval(() => {
+  match.updateInterval =  setInterval(() => {
     io.to(room).emit("updateState", { state: match.game.STATE });
-  });
+  },SERVER_TIME_STEP);
 };
 const lookForMatchReady = () => {
   setInterval(() => {

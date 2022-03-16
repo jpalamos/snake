@@ -1,6 +1,7 @@
 import { startGame, updateState } from "./game.client.js";
 import { gameHtml } from "./gameRender.js";
 import { axis } from "./controls.js";
+
 let socket;
 let searching = false;
 let searchAnimationInterval;
@@ -20,6 +21,8 @@ if (!params.has("username")) {
 
 let username = params.get("username");
 socket = io(window.location.host + "?username=" + username);
+
+
 //Listeners
 socket.on("connect", function () {
   console.log("Conexión exitosa");
@@ -29,7 +32,7 @@ socket.on("welcome", function (data) {
   lblOnlinePlayers.innerHTML = data.onlineUsers.length;
 });
 socket.on("onlineUsers", function (data) {
-  console.log("Server: " + data.message, data.user.username);
+  console.log("Server: " + data.message);
   lblOnlinePlayers.innerHTML = data.onlineUsers.length;
 });
 socket.on("matchReady", function (data) {
@@ -45,10 +48,21 @@ socket.on("updateState", function (data) {
   updateState(data.state);
 });
 
-socket.on("disconnect", function (resp) {});
+
+socket.on("connectionRejected", function (resp) {
+  console.log("Desconectado",resp);
+  window.location = "index.html";
+});
 socket.on("error", function (reason) {
   console.log(reason);
 });
+
+const sendAxis = ()=>
+{
+  socket.emit("move",axis);
+}
+
+document.addEventListener("onAxisChange",sendAxis);
 
 btnBuscarPartida.onclick = function () {
   if (!searching) {
@@ -57,7 +71,7 @@ btnBuscarPartida.onclick = function () {
     this.innerHTML = "Cancelar";
     searching = true;
   } else {
-    socket.emit("stopSearchMacth");
+    socket.emit("stopSearchMatch");
     matchSearchEnd();
     this.innerHTML = "Buscar Partida";
     searching = false;

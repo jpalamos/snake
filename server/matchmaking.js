@@ -19,12 +19,15 @@ const addPlayer = (player) => {
     startingMatches.push(match);
   }
 };
-
+const removePlayer = (player)=>{
+  playerSearching = playerSearching.filter((user)=> user.id != player.id);
+}
 class Match {
   constructor(players) {
     this.id = crypto.randomBytes(20).toString("hex");
     this.players = players;
     this.game = new Game();
+    this.updateInterval = undefined;
   }
 
   startGame() {
@@ -34,6 +37,7 @@ class Match {
 
 module.exports = {
   addPlayer,
+  removePlayer,
   startingMatches,
   matches,
 };
