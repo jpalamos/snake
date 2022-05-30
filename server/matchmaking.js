@@ -1,7 +1,7 @@
 const crypto = require("crypto");
 const { Game } = require("./game.server");
 
-const EXPECTED_PLAYERS = 2;
+const EXPECTED_PLAYERS = 3;
 
 let matches = [];
 let playerSearching = [];
@@ -11,16 +11,16 @@ const addPlayer = (player) => {
   playerSearching.push(player);
 
   if (playerSearching.length >= EXPECTED_PLAYERS) {
-    let playersReady = playerSearching.splice(0, 2);
+    let playersReady = playerSearching.splice(0, EXPECTED_PLAYERS);
     let match = new Match(playersReady);
-    console.log("New Match Ready: " + match.id);
+    console.log("New Match Ready: " + match.id, playersReady);
 
     matches.push(match);
     startingMatches.push(match);
   }
 };
-const removePlayer = (player)=>{
-  playerSearching = playerSearching.filter((user)=> user.id != player.id);
+const removePlayer = (player) => {
+  playerSearching = playerSearching.filter((user) => user.id != player.id);
 }
 class Match {
   constructor(players) {

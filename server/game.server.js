@@ -50,23 +50,27 @@ class Game {
           player.score += egg.points;
         }
       });
-
-      player.checkColission(0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
+      player.checkColission(0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT, this.axes[player.id]);
+      if (player.checkColission_snakes(this.STATE.players.filter((p) => p.id !== player.id))) {
+        this.removePlayer(player.id)
+      };
     });
+    // console.log('-----')
   }
 
   spawnPlayer(player) {
     this.STATE.players.push(
       new Player(
         player.id,
-        player.usernameusername,
+        player.username,
         Math.floor(Math.random() * (this.CANVAS_WIDTH / 2 - 10)) + 10,
         Math.floor(Math.random() * (this.CANVAS_HEIGHT - 10)) + 10
       )
     );
+    let axisInit = (Math.random() >= 0.5) ? 1 : 0;
     this.axes[player.id] = {
-      horizontal: 1,
-      vertical: 0,
+      horizontal: axisInit,
+      vertical: axisInit === 0 ? 1 : 0,
     };
   }
 
@@ -83,9 +87,7 @@ class Game {
   };
 
   removePlayer = (playerId) => {
-    this.STATE.players = STATE.players.filter((player) => {
-      if (player.id != playerId) return player;
-    });
+    this.STATE.players = this.STATE.players.filter((player) => player.id !== playerId);
   };
 }
 

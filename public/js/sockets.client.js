@@ -13,8 +13,7 @@ var divLobby = document.getElementById("divLobby");
 var divGame = document.getElementById("divGame");
 
 const params = new URLSearchParams(window.location.search);
-
-if (!params.has("username")) {
+if (!params.has("username") || params.get("username") === '') {
   window.location = "index.html";
   throw new Error("Se requiere el username");
 }
@@ -50,19 +49,18 @@ socket.on("updateState", function (data) {
 
 
 socket.on("connectionRejected", function (resp) {
-  console.log("Desconectado",resp);
+  console.log("Desconectado", resp);
   window.location = "index.html";
 });
 socket.on("error", function (reason) {
   console.log(reason);
 });
 
-const sendAxis = ()=>
-{
-  socket.emit("move",axis);
+const sendAxis = () => {
+  socket.emit("move", axis);
 }
 
-document.addEventListener("onAxisChange",sendAxis);
+document.addEventListener("onAxisChange", sendAxis);
 
 btnBuscarPartida.onclick = function () {
   if (!searching) {

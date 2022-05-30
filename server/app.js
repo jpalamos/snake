@@ -5,7 +5,7 @@ const io = require("socket.io")(server);
 const path = require("path");
 
 const publicPath = path.resolve(__dirname, "../public");
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 app.use(express.static(publicPath));
 
